@@ -1,17 +1,21 @@
 package lovechrono.lovechrono.controller;
 
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.responses.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lovechrono.lovechrono.entity.Event;
 import lovechrono.lovechrono.repository.EventRepository;
 import lovechrono.lovechrono.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RestController
 @CrossOrigin(origins = "http://127.0.0.1:5173")
-@RequestMapping("/api/event")
+@RequestMapping(value = "/api/event", produces = {"application/json"})
+@Tag(name = "Eventos")
 public class EventController {
 
     @Autowired
@@ -20,12 +24,19 @@ public class EventController {
     @Autowired
     public EventRepository eventRepository;
 
+    @Operation(summary = "Realiza a busca de todos os eventos cadastrados", method = "GET")
+    @ApiResponses(value={
+            @ApiResponse(responseCode = "200", description = "Dados retorndaos com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Recurso não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Solicitação inválida")
+    })
     @GetMapping
     @CrossOrigin(origins = "http://127.0.0.1:5173")
     public ResponseEntity<?> findAll(){
         return ResponseEntity.ok().body(this.eventRepository.findByEventsAtivos());
     }
 
+    @Operation(summary = "Realiza a busca de eventos cadastrados por ID", method = "GET")
     @GetMapping("/{id}")
     public ResponseEntity<Event> findById(
             @PathVariable final Long id
@@ -33,12 +44,14 @@ public class EventController {
         return ResponseEntity.ok().body(this.eventRepository.findById(id).orElse(new Event()));
     }
 
+    @Operation(summary = "Cadastra um novo evento", method = "POST")
     @PostMapping
     public ResponseEntity<?> cadastrar(@RequestBody final Event event) {
         this.eventRepository.save(event);
         return ResponseEntity.ok().body("Evento cadastrado com sucesso");
     }
 
+    @Operation(summary = "Atualiza Evento por ID", method = "PUT")
     @PutMapping("/atualizar/{id}")
     public ResponseEntity<?> atualizar(
             @PathVariable final Long id,
@@ -73,6 +86,7 @@ public class EventController {
 //        }
     }
 
+    @Operation(summary = "Deleta evento por ID", method = "DELETE")
     @DeleteMapping("/deleta/{id}")
     public ResponseEntity<?> excluir(
             @PathVariable final Long id
